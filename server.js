@@ -11,6 +11,7 @@ server.get(`/`, handelGet)
 server.get(`/favorite`, handelGetsec)
 server.use(handelErrorserver)
 server.get('*', handelError);
+server.use(handelErrorserver)
 
 
 
@@ -60,7 +61,6 @@ function handelError(request, response) {
 
 // # handel error 500
 
-server.use(handelErrorserver)
 
 function handelErrorserver(error ,request, response) {
 const err ={
