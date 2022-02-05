@@ -30,6 +30,13 @@ server.get(`/discover`, handeldiscover);    //  new route
 server.post('/addMovie',addMovieHandler);
 server.get('/getMovies',getMoviesHandler);
 
+server.put('/UPDATE/:id',updateMovieHandler);
+server.delete('/DELETE/:id',deleteMoviesHandler);
+
+server.get('/getMovie/:id',getoneMovieHandler);
+
+
+
 server.use('*', handelError);
 server.use(handelErrorserver);
 
@@ -166,7 +173,7 @@ function addMovieHandler(request, response) {
 
 // console.log(request.body);
 const movie =request.body;
-let sql =`INSERT INTO allMovie( title,release_date,poster_path,overview) VALUES ($1,$2,$3,$4) RETURNING *;`
+let sql =`INSERT INTO allMovie( title,release_date,poster_path,overview) VALUES ($1,$2,$3,$4) RETURNING *;`;
 let values =[movie.title,movie.release_date,movie.poster_path,movie.overview];
 client.query(sql,values).then(data => {
     response.status(200).json(data.rows);
@@ -192,7 +199,51 @@ client.query(sql).then(data=> {
 }
 
 
+// server.put('/UPDATE/:id',updateMovieHandler);
 
+function updateMovieHandler(request, response) {
+const id = request.params.id ;
+const movie =request.body;
+const sql =`UPDATE allMovie SET title=$1 , release_date=$2 , poster_path=$3, overview=$4 WHERE id=$5 RETURNING *;`;
+
+let values =[movie.title,movie.release_date,movie.poster_path,movie.overview,id];
+client.query(sql,values).then(data=> {
+    response.status(200).json(data.rows);
+}).catch(error=>{
+    handelErrorserver(error,request,response)
+});
+}
+
+
+
+// server.delete('/DELETE/:id',deleteMoviesHandler);
+
+function deleteMoviesHandler(request, response) {
+
+ const id = request.params.id ;
+ const sql = `DELETE FROM allMovie WHERE id=${id};`
+ client.query(sql).then(()=>{
+     response.status(200).send("The movie has been deleted");
+ }).catch(error=>{
+    handelErrorserver(error,request,response)
+});
+
+}
+
+
+
+// server.get('/getMovie/:id',getoneMovieHandler);
+function getoneMovieHandler(request, response) {
+
+    let sql = `SELECT * FROM allMovie WHERE id=${request.params.id};`;
+client.query(sql).then(data=> {
+    response.status(200).json(data.rows);
+}).catch(error=>{
+    handelErrorserver(error,request,response)
+});
+
+
+}
 
 
 
