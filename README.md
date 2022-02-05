@@ -15,5 +15,6 @@
 3-press inter
 4-now you in Home Page.
 
+** before you start work on my server, first you have to generate (.env) file and put inside of it your port and your APIKEY fot this API 
 ## Project Features
 
