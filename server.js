@@ -5,6 +5,8 @@ require('dotenv').config();
 const express = require(`express`);
 const cors = require(`cors`);
 const axios = require('axios');
+const pg = require('pg');
+const client = new pg.Client(process.env.DATABASE_URL);
 
 const PORT = process.env.PORT;
 
@@ -13,6 +15,7 @@ const PORT = process.env.PORT;
 
 const server = express();
 server.use(cors());
+server.use(express.json());
 
 server.get(`/`, handelGet)
 server.get(`/favorite`, handelGetsec)
@@ -23,6 +26,9 @@ server.get(`/search`, handelSearching);
 server.get(`/movieToprated`, handelmovieToprate);    //  new route
 
 server.get(`/discover`, handeldiscover);    //  new route
+
+server.post('/addMovie',addMovieHandler);
+server.get('/getMovies',getMoviesHandler);
 
 server.use('*', handelError);
 server.use(handelErrorserver);
@@ -86,7 +92,6 @@ function handelTrend(request, response) {
         handelErrorserver(err, request, response);
     });
 }
-
 
 // ----
 // server.get (`/search` , handelSearching);
@@ -154,6 +159,44 @@ function handeldiscover(request, response) {           // new route
 }
 
 
+
+// server.post('/addMovie',addMovieHandler);
+
+function addMovieHandler(request, response) {
+
+// console.log(request.body);
+const movie =request.body;
+let sql =`INSERT INTO allMovie( title,release_date,poster_path,overview) VALUES ($1,$2,$3,$4) RETURNING *;`
+let values =[movie.title,movie.release_date,movie.poster_path,movie.overview];
+client.query(sql,values).then(data => {
+    response.status(200).json(data.rows);
+
+}).catch(error =>{
+    handelErrorserver(error,request,response)
+});
+}
+
+
+
+// server.get('/getMovies',getMoviesHandler);
+
+function getMoviesHandler(request, response) {
+
+let sql = `SELECT * FROM allMovie;`;
+client.query(sql).then(data=> {
+    response.status(200).json(data.rows);
+}).catch(error=>{
+    handelErrorserver(error,request,response)
+});
+
+}
+
+
+
+
+
+
+
 // server.get('*',handelError);
 
 function handelError(request, response) {
@@ -174,7 +217,8 @@ function handelErrorserver(error, request, response) {
     response.status(500).send(err);
 }
 
-
+client.connect().then(()=>{
 server.listen(PORT, () => {
     console.log(`here we start in our website ${PORT}`)
+})
 })
